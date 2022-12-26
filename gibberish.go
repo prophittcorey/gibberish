@@ -1,6 +1,9 @@
 package gibberish
 
-import "io"
+import (
+	"io"
+	"strings"
+)
 
 /*
 
@@ -28,6 +31,20 @@ func (c *Classifier) Train(r io.Reader) error {
 
 func (c *Classifier) Check(junk string) (bool, error) {
 	return false, nil
+}
+
+// Normalize's a string for the given classifier. Removes any runes that are
+// not part of the classifier's runeset.
+func (c *Classifier) normalize(s string) string {
+	var sb strings.Builder
+
+	for _, r := range s {
+		if _, ok := c.runes[r]; ok {
+			sb.WriteRune(r)
+		}
+	}
+
+	return sb.String()
 }
 
 // New creates a new classifier that is ready for use.
