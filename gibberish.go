@@ -5,20 +5,8 @@ import (
 	"strings"
 )
 
-/*
-
-classifier := gibberish.New()
-
-classifier.Train(strings.NewReader("some big text"))
-
-if ok, err := classifier.Check("something"); err == nil && ok {
-	// Gibberish
-}
-
-*/
-
-const (
-	DefaultCharset = "abcdefghijklmnopqrstuvwxyz "
+var (
+	DefaultCharset = []rune("abcdefghijklmnopqrstuvwxyz ")
 )
 
 type Classifier struct {
@@ -48,18 +36,28 @@ func (c *Classifier) normalize(s string) string {
 }
 
 // New creates a new classifier that is ready for use.
-func New(runsets ...string) *Classifier {
-	if len(runsets) == 0 {
-		runsets = append(runsets, DefaultCharset)
+func New(runesets ...[]rune) *Classifier {
+	if len(runesets) == 0 {
+		runesets = append(runesets, DefaultCharset)
 	}
 
 	classifier := &Classifier{runes: map[rune]struct{}{}}
 
-	for _, runes := range runsets {
+	for _, runes := range runesets {
 		for _, char := range runes {
 			classifier.runes[char] = struct{}{}
 		}
 	}
 
 	return classifier
+}
+
+// ngrams is a helper function that takes a slice of runes and returns the
+// n-grams for the slice (into a slice of slice of runes).
+func ngrams(n int, rs []rune) (runes [][]rune) {
+	for i := 0; i < len(rs)-n+1; i++ {
+		runes = append(runes, rs[i:i+n])
+	}
+
+	return runes
 }

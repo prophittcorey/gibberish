@@ -32,7 +32,7 @@ func TestClassifier(t *testing.T) {
 }
 
 func TestClassifierNormalize(t *testing.T) {
-	classifier := New("abc ")
+	classifier := New([]rune("abc "))
 
 	if cleaned := classifier.normalize("_-dza dfdb ddc"); cleaned != "a b c" {
 		t.Fatalf("failed to clean stringl got %s", cleaned)
