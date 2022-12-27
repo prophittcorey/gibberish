@@ -1,21 +1,28 @@
+// Package gibberish enables you to train a model to determine if strings
+// contain gibberish text.
 package gibberish
 
 import (
 	"bufio"
 	"io"
-	"log"
 	"math"
 	"strings"
 )
 
 var (
+	// DefaultCharset are the basic runes used by the default classifier.
+	// Basically, it avoids punctuation. If you have a special purpose like
+	// classifying email addresses you may choose to include other runes like
+	// '@', '.', etc.
 	DefaultCharset = []rune("abcdefghijklmnopqrstuvwxyz ")
 )
 
 type Classifier struct {
-	counts    map[rune]map[rune]float64
-	runes     map[rune]struct{}
-	threshold float64
+	// Threshold is the cut off for the average transition probability.
+	Threshold float64
+
+	counts map[rune]map[rune]float64
+	runes  map[rune]struct{}
 }
 
 func (c *Classifier) Train(r io.Reader) error {
@@ -40,14 +47,13 @@ func (c *Classifier) Train(r io.Reader) error {
 		}
 	}
 
-	// TODO: Pick a threshold automatically?
-
 	return nil
 }
 
-func (c *Classifier) Check(junk string) (bool, error) {
-	log.Println(c.avg([]rune(junk)), c.threshold)
-	return c.avg([]rune(junk)) > c.threshold, nil
+func (c *Classifier) Gibberish(junk string) (bool, float64) {
+	prob := c.avg([]rune(junk))
+
+	return prob < c.Threshold, prob
 }
 
 // Normalize's a string for the given classifier. Removes any runes that are
@@ -55,7 +61,7 @@ func (c *Classifier) Check(junk string) (bool, error) {
 func (c *Classifier) normalize(s string) string {
 	var sb strings.Builder
 
-	for _, r := range s {
+	for _, r := range strings.ToLower(strings.TrimSpace(s)) {
 		if _, ok := c.runes[r]; ok {
 			sb.WriteRune(r)
 		}
@@ -109,8 +115,9 @@ func New(runesets ...[]rune) *Classifier {
 		}
 	}
 
-	// TODO: Should we try to determine this automatically?
-	classifier.threshold = 0.85
+	if classifier.Threshold == float64(0) {
+		classifier.Threshold = 0.85
+	}
 
 	return classifier
 }

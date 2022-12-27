@@ -22,7 +22,9 @@ func TestClassifier(t *testing.T) {
 		t.Fatalf("failed to train data; %s", err)
 	}
 
-	// The "good"
+	//
+	// The "good".
+	//
 
 	good := []string{
 		"Sherlock holmes returned.",
@@ -31,20 +33,24 @@ func TestClassifier(t *testing.T) {
 	}
 
 	for _, sentence := range good {
-		if ok, err := classifier.Check(sentence); err == nil && ok {
-			t.Fatalf("falsely flagged good sentences as gibberish; %s", sentence)
+		if ok, prob := classifier.Gibberish(sentence); ok {
+			t.Fatalf("falsely flagged good sentences as gibberish; %s at %f", sentence, prob)
 		}
 	}
 
-	// The "bad"
+	//
+	// The "bad".
+	//
 
 	bad := []string{
 		"zzzzzzzzz",
+		"This sentence sdsadasdasdjhkahjdkadhkjsdh is bad?",
+		"This sentence looks good, but zooooooooooooooooooooooooooooo.",
 	}
 
 	for _, sentence := range bad {
-		if ok, err := classifier.Check(sentence); err == nil && !ok {
-			t.Fatalf("failed to detect a gibberish sentence; %s", sentence)
+		if ok, prob := classifier.Gibberish(sentence); !ok {
+			t.Fatalf("failed to detect a gibberish sentence; %s at %f", sentence, prob)
 		}
 	}
 }
