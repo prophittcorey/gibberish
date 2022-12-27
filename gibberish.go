@@ -3,6 +3,7 @@ package gibberish
 import (
 	"bufio"
 	"io"
+	"math"
 	"strings"
 )
 
@@ -11,14 +12,12 @@ var (
 )
 
 type Classifier struct {
-	counts    map[rune]map[rune]int
+	counts    map[rune]map[rune]float64
 	runes     map[rune]struct{}
 	threshold float64
 }
 
 func (c *Classifier) Train(r io.Reader) error {
-	// k := len(c.runes)
-
 	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
@@ -31,15 +30,22 @@ func (c *Classifier) Train(r io.Reader) error {
 		}
 	}
 
-	// Normalize the counts?
+	// Normalize the counts to log probabilities.
+	for a, transitions := range c.counts {
+		s := float64(len(transitions))
 
-	// Pick a threshold.
+		for b, counts := range transitions {
+			c.counts[a][b] = math.Log(counts / s)
+		}
+	}
+
+	// TODO: Pick a threshold automatically?
 
 	return nil
 }
 
 func (c *Classifier) Check(junk string) (bool, error) {
-	return false, nil
+	return c.avg([]rune(junk)) > c.threshold, nil
 }
 
 // Normalize's a string for the given classifier. Removes any runes that are
@@ -56,6 +62,26 @@ func (c *Classifier) normalize(s string) string {
 	return sb.String()
 }
 
+// avg is the average transition probability for a slice of runes.
+func (c *Classifier) avg(runes []rune) float64 {
+	log := 0.0
+	counts := 0.0
+
+	for _, grams := range ngrams(2, runes) {
+		a, b := grams[0], grams[1]
+
+		log += c.counts[a][b]
+
+		counts++
+	}
+
+	if counts == 0.0 {
+		counts = 1.0
+	}
+
+	return math.Exp(log / counts)
+}
+
 // New creates a new classifier that is ready for use.
 func New(runesets ...[]rune) *Classifier {
 	if len(runesets) == 0 {
@@ -70,11 +96,14 @@ func New(runesets ...[]rune) *Classifier {
 		}
 	}
 
-	classifier.counts = map[rune]map[rune]int{}
+	classifier.counts = map[rune]map[rune]float64{}
 
 	for r := range classifier.runes {
-		classifier.counts[r] = map[rune]int{}
+		classifier.counts[r] = map[rune]float64{}
 	}
+
+	// TODO: Should we try to determine this automatically?
+	classifier.threshold = 0.85
 
 	return classifier
 }
