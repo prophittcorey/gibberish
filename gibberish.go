@@ -1,6 +1,7 @@
 package gibberish
 
 import (
+	"bufio"
 	"io"
 	"strings"
 )
@@ -10,10 +11,30 @@ var (
 )
 
 type Classifier struct {
-	runes map[rune]struct{}
+	counts    map[rune]map[rune]int
+	runes     map[rune]struct{}
+	threshold float64
 }
 
 func (c *Classifier) Train(r io.Reader) error {
+	// k := len(c.runes)
+
+	scanner := bufio.NewScanner(r)
+
+	for scanner.Scan() {
+		runes := []rune(c.normalize(strings.TrimSpace(scanner.Text())))
+
+		for _, grams := range ngrams(2, runes) {
+			a, b := grams[0], grams[1]
+
+			c.counts[a][b]++
+		}
+	}
+
+	// Normalize the counts?
+
+	// Pick a threshold.
+
 	return nil
 }
 
@@ -44,9 +65,15 @@ func New(runesets ...[]rune) *Classifier {
 	classifier := &Classifier{runes: map[rune]struct{}{}}
 
 	for _, runes := range runesets {
-		for _, char := range runes {
-			classifier.runes[char] = struct{}{}
+		for _, r := range runes {
+			classifier.runes[r] = struct{}{}
 		}
+	}
+
+	classifier.counts = map[rune]map[rune]int{}
+
+	for r := range classifier.runes {
+		classifier.counts[r] = map[rune]int{}
 	}
 
 	return classifier
