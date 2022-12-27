@@ -3,6 +3,7 @@ package gibberish
 import (
 	"bufio"
 	"io"
+	"log"
 	"math"
 	"strings"
 )
@@ -45,6 +46,7 @@ func (c *Classifier) Train(r io.Reader) error {
 }
 
 func (c *Classifier) Check(junk string) (bool, error) {
+	log.Println(c.avg([]rune(junk)), c.threshold)
 	return c.avg([]rune(junk)) > c.threshold, nil
 }
 
@@ -100,6 +102,11 @@ func New(runesets ...[]rune) *Classifier {
 
 	for r := range classifier.runes {
 		classifier.counts[r] = map[rune]float64{}
+
+		// Assume we've seen 10 of each rune. Acts as a kind of prior/smoothing.
+		for k := range classifier.runes {
+			classifier.counts[r][k] = 10.0
+		}
 	}
 
 	// TODO: Should we try to determine this automatically?

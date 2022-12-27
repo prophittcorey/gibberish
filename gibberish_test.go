@@ -22,11 +22,29 @@ func TestClassifier(t *testing.T) {
 		t.Fatalf("failed to train data; %s", err)
 	}
 
-	gibberish := []string{"zzzzzzzzz"}
+	// The "good"
 
-	for _, junk := range gibberish {
-		if ok, err := classifier.Check(junk); err == nil && !ok {
-			t.Fatalf("failed to detect known gibberish %s", junk)
+	good := []string{
+		"Sherlock holmes returned.",
+		"This should be good.",
+		"This sentence is completely good, at least-- it seems to be to me.",
+	}
+
+	for _, sentence := range good {
+		if ok, err := classifier.Check(sentence); err == nil && ok {
+			t.Fatalf("falsely flagged good sentences as gibberish; %s", sentence)
+		}
+	}
+
+	// The "bad"
+
+	bad := []string{
+		"zzzzzzzzz",
+	}
+
+	for _, sentence := range bad {
+		if ok, err := classifier.Check(sentence); err == nil && !ok {
+			t.Fatalf("failed to detect a gibberish sentence; %s", sentence)
 		}
 	}
 }
