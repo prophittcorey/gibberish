@@ -21,6 +21,19 @@ This is some example text. You should train on a lot of textual data for
 whatever your use case is; in as many target languages as you need, etc.
 `))
 
+classifier.Feed(
+    /* Label some good data to adjust the classifier. */
+    strings.NewReader(`
+      This is a good sentence.
+      Another good sentence.
+    `),
+    /* Label some bad data to adjust the classifier. */
+    strings.NewReader(`
+      sadkasdlasjdlasjdla
+      asdlkaldjalsdjlasjd
+    `),
+)
+
 /* save */
 
 if err := classifier.SaveFile(os.TempDir() + "/gibberish.classifier"); err != nil {
