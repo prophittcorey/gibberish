@@ -55,6 +55,48 @@ func TestClassifier(t *testing.T) {
 	}
 }
 
+func TestClassifierFromFile(t *testing.T) {
+	classifier := New()
+
+	err := classifier.LoadFile("testfiles/classifier.gob.gz")
+
+	if err != nil {
+		t.Fatalf("failed to load classifier; %s", err)
+	}
+
+	//
+	// The "good".
+	//
+
+	good := []string{
+		"Sherlock holmes returned.",
+		"This should be good.",
+		"This sentence is completely good, at least-- it seems to be to me.",
+	}
+
+	for _, sentence := range good {
+		if ok, prob := classifier.Gibberish(sentence); ok {
+			t.Fatalf("falsely flagged good sentences as gibberish; %s at %f", sentence, prob)
+		}
+	}
+
+	//
+	// The "bad".
+	//
+
+	bad := []string{
+		"zzzzzzzzz",
+		"This sentence sdsadasdasdjhkahjdkadhkjsdh is bad?",
+		"This sentence looks good, but zooooooooooooooooooooooooooooo.",
+	}
+
+	for _, sentence := range bad {
+		if ok, prob := classifier.Gibberish(sentence); !ok {
+			t.Fatalf("failed to detect a gibberish sentence; %s at %f", sentence, prob)
+		}
+	}
+}
+
 func TestClassifierNormalize(t *testing.T) {
 	classifier := New([]rune("abc "))
 

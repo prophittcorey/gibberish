@@ -4,17 +4,22 @@ package gibberish
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
+	"encoding/gob"
 	"io"
+	"log"
 	"math"
+	"os"
 	"strings"
 )
 
 var (
-	// DefaultCharset are the basic runes used by the default classifier.
+	// DefaultRuneSet are the basic runes used by the default classifier.
 	// Basically, it avoids punctuation. If you have a special purpose like
 	// classifying email addresses you may choose to include other runes like
 	// '@', '.', etc.
-	DefaultCharset = []rune("abcdefghijklmnopqrstuvwxyz ")
+	DefaultRuneSet = []rune("abcdefghijklmnopqrstuvwxyz ")
 )
 
 type Classifier struct {
@@ -56,6 +61,103 @@ func (c *Classifier) Gibberish(junk string) (bool, float64) {
 	return prob < c.Threshold, prob
 }
 
+// Load takes an io.Reader and decodes it. This can be used to read a
+// classifier from a file, virtual file, bytes, etc.
+func (c *Classifier) Load(reader io.Reader) error {
+	gz, err := gzip.NewReader(reader)
+
+	if err != nil {
+		return err
+	}
+
+	decoder := gob.NewDecoder(gz)
+
+	if err := gz.Close(); err != nil {
+		return err
+	}
+
+	return decoder.Decode(c)
+}
+
+// LoadFile wraps Load.
+func (c *Classifier) LoadFile(file string) error {
+	f, err := os.Open(file)
+
+	if err != nil {
+		return err
+	}
+
+	defer (func() {
+		if err := f.Close(); err != nil {
+			log.Printf("warning: failed to close file; %s", err)
+		}
+	})()
+
+	return c.Load(f)
+}
+
+// Save serializes a classifier and writes it out to an io.Writer.
+func (c Classifier) Save(writer io.Writer) error {
+	gz := gzip.NewWriter(writer)
+
+	if err := gob.NewEncoder(gz).Encode(&c); err != nil {
+		return err
+	}
+
+	return gz.Close()
+}
+
+// SaveFile wraps Save.
+func (c Classifier) SaveFile(file string) error {
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	defer (func() {
+		if err := f.Close(); err != nil {
+			log.Printf("warning: failed to close file; %s", err)
+		}
+	})()
+
+	return c.Save(f)
+}
+
+func (c *Classifier) GobDecode(buf []byte) error {
+	decoder := gob.NewDecoder(bytes.NewBuffer(buf))
+
+	if err := decoder.Decode(&c.counts); err != nil {
+		return err
+	}
+
+	if err := decoder.Decode(&c.runes); err != nil {
+		return err
+	}
+
+	return decoder.Decode(&c.Threshold)
+}
+
+func (c Classifier) GobEncode() ([]byte, error) {
+	w := &bytes.Buffer{}
+
+	encoder := gob.NewEncoder(w)
+
+	if err := encoder.Encode(c.counts); err != nil {
+		return nil, err
+	}
+
+	if err := encoder.Encode(c.runes); err != nil {
+		return nil, err
+	}
+
+	if err := encoder.Encode(c.Threshold); err != nil {
+		return nil, err
+	}
+
+	return w.Bytes(), nil
+}
+
 // Normalize's a string for the given classifier. Removes any runes that are
 // not part of the classifier's runeset.
 func (c *Classifier) normalize(s string) string {
@@ -93,7 +195,7 @@ func (c *Classifier) avg(runes []rune) float64 {
 // New creates a new classifier that is ready for use.
 func New(runesets ...[]rune) *Classifier {
 	if len(runesets) == 0 {
-		runesets = append(runesets, DefaultCharset)
+		runesets = append(runesets, DefaultRuneSet)
 	}
 
 	classifier := &Classifier{runes: map[rune]struct{}{}}
