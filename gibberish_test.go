@@ -40,7 +40,7 @@ func TestClassifier(t *testing.T) {
 		t.Fatalf("failed to train data; %s", err)
 	}
 
-	err = classifier.Feed(strings.NewReader(gooddata), strings.NewReader(baddata))
+	err = classifier.Label(strings.NewReader(gooddata), strings.NewReader(baddata))
 
 	if err != nil {
 		t.Fatalf("failed to feed classifier; %s", err)
@@ -88,7 +88,7 @@ func TestClassifierFromFile(t *testing.T) {
 		t.Fatalf("failed to load classifier; %s", err)
 	}
 
-	err = classifier.Feed(strings.NewReader(gooddata), strings.NewReader(baddata))
+	err = classifier.Label(strings.NewReader(gooddata), strings.NewReader(baddata))
 
 	if err != nil {
 		t.Fatalf("failed to feed classifier; %s", err)

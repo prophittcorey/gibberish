@@ -54,9 +54,9 @@ func (c *Classifier) Train(r io.Reader) error {
 	return nil
 }
 
-// Feed the classifier curated good and bad data. The classifier will adjust
-// its threshold for classifying data based on what you feed it.
-func (c *Classifier) Feed(good io.Reader, bad io.Reader) error {
+// Label good and bad data. The classifier will adjust its threshold
+// for classifying data based on what you feed it.
+func (c *Classifier) Label(good io.Reader, bad io.Reader) error {
 	var mingood, maxbad float64
 
 	scanner := bufio.NewScanner(good)
