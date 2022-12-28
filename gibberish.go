@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"log"
 	"math"
@@ -23,11 +24,9 @@ var (
 )
 
 type Classifier struct {
-	// Threshold is the cut off for the average transition probability.
-	Threshold float64
-
-	counts map[rune]map[rune]float64
-	runes  map[rune]struct{}
+	threshold float64
+	counts    map[rune]map[rune]float64
+	runes     map[rune]struct{}
 }
 
 func (c *Classifier) Train(r io.Reader) error {
@@ -55,10 +54,41 @@ func (c *Classifier) Train(r io.Reader) error {
 	return nil
 }
 
-func (c *Classifier) Gibberish(junk string) (bool, float64) {
-	prob := c.avg([]rune(junk))
+// Feed the classifier curated good and bad data. The classifier will adjust
+// its threshold for classifying data based on what you feed it.
+func (c *Classifier) Feed(good io.Reader, bad io.Reader) error {
+	var mingood, maxbad float64
 
-	return prob < c.Threshold, prob
+	scanner := bufio.NewScanner(good)
+
+	for scanner.Scan() {
+		if _, prob := c.Gibberish(scanner.Text()); prob < mingood {
+			mingood = prob
+		}
+	}
+
+	scanner = bufio.NewScanner(bad)
+
+	for scanner.Scan() {
+		if _, prob := c.Gibberish(scanner.Text()); prob > maxbad {
+			maxbad = prob
+		}
+	}
+
+	/* take the middle as our cutoff */
+	c.threshold = (mingood + maxbad) / 2.0
+
+	if mingood >= maxbad {
+		return fmt.Errorf("error: something isn't right, possible poor good/bad data")
+	}
+
+	return nil
+}
+
+func (c *Classifier) Gibberish(junk string) (bool, float64) {
+	prob := c.avg([]rune(c.normalize(junk)))
+
+	return prob < c.threshold, prob
 }
 
 // Load takes an io.Reader and decodes it. This can be used to read a
@@ -135,7 +165,7 @@ func (c *Classifier) GobDecode(buf []byte) error {
 		return err
 	}
 
-	return decoder.Decode(&c.Threshold)
+	return decoder.Decode(&c.threshold)
 }
 
 func (c Classifier) GobEncode() ([]byte, error) {
@@ -151,7 +181,7 @@ func (c Classifier) GobEncode() ([]byte, error) {
 		return nil, err
 	}
 
-	if err := encoder.Encode(c.Threshold); err != nil {
+	if err := encoder.Encode(c.threshold); err != nil {
 		return nil, err
 	}
 
@@ -215,10 +245,6 @@ func New(runesets ...[]rune) *Classifier {
 		for k := range classifier.runes {
 			classifier.counts[r][k] = 10.0
 		}
-	}
-
-	if classifier.Threshold == float64(0) {
-		classifier.Threshold = 0.85
 	}
 
 	return classifier
