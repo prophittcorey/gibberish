@@ -17,11 +17,11 @@ var gooddata = `
 This is a normal sentence.
 Here is another sentence that is normal.
 A man, a plan, a codebase.
+this is a good sentence.
+good sentence.
 `
 
 var baddata = `
-xxxxxxxxxxxxxxxxxxxxxx
-This looks terrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrribleeee!!!!
 lkqwlkdjqwldjqwldjqwldjqwk
 A junk lkrejtlerjtlrejtlkerjtlkerjtl sentence.
 zxcvwerjasc
@@ -29,6 +29,7 @@ This sentence lamsxamklm123121l2mmlmdlamdla is bad?
 212pok12o3k12pk312
 asxpaksxpakxpakxapksx
 This sentence kmlsm1l2m12lwm12lmasdasldajslal is bad?
+This is a long sentence but has ;lqk;qwkq;wkq;w crappy junk l1w;1wk;12kw;12lk in it.
 `
 
 func TestClassifier(t *testing.T) {
@@ -51,7 +52,7 @@ func TestClassifier(t *testing.T) {
 	//
 
 	good := []string{
-		"Sherlock holmes returned.",
+		"Sherlock holmes returned home.",
 		"This should be good.",
 		"This sentence is completely good, at least-- it seems to be to me.",
 	}
