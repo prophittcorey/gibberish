@@ -62,7 +62,7 @@ func (c *Classifier) Label(good io.Reader, bad io.Reader) error {
 	scanner := bufio.NewScanner(good)
 
 	for scanner.Scan() {
-		if _, prob := c.Gibberish(scanner.Text()); prob < mingood {
+		if prob := c.avg([]rune(c.normalize(scanner.Text()))); prob < mingood {
 			mingood = prob
 		}
 	}
@@ -70,7 +70,7 @@ func (c *Classifier) Label(good io.Reader, bad io.Reader) error {
 	scanner = bufio.NewScanner(bad)
 
 	for scanner.Scan() {
-		if _, prob := c.Gibberish(scanner.Text()); prob > maxbad {
+		if prob := c.avg([]rune(c.normalize(scanner.Text()))); prob > maxbad {
 			maxbad = prob
 		}
 	}
