@@ -59,7 +59,7 @@ func (c *Classifier) Train(r io.Reader) error {
 		}
 	}
 
-	c.threshold = 25.0
+	c.threshold = 50.0
 
 	return nil
 }
@@ -67,29 +67,21 @@ func (c *Classifier) Train(r io.Reader) error {
 // Label good and bad data. The classifier will adjust its threshold
 // for classifying data based on what you feed it.
 func (c *Classifier) Label(good io.Reader, bad io.Reader) error {
-	var mingood, maxbad float64
+	var maxbad float64
 
-	scanner := bufio.NewScanner(good)
+	scanner := bufio.NewScanner(bad)
 
 	for scanner.Scan() {
-		if prob := c.avg([]rune(c.normalize(scanner.Text()))); prob < mingood {
-			mingood = prob
+		if p := c.avg([]rune(c.normalize(scanner.Text()))); p > maxbad {
+			maxbad = p
 		}
 	}
 
-	scanner = bufio.NewScanner(bad)
+	/* convervative, take the maximum bad probability as the bar */
+	c.threshold = maxbad
 
-	for scanner.Scan() {
-		if prob := c.avg([]rune(c.normalize(scanner.Text()))); prob > maxbad {
-			maxbad = prob
-		}
-	}
-
-	/* take the middle as our cutoff */
-	c.threshold = (mingood + maxbad) / 2.0
-
-	if mingood >= maxbad {
-		return fmt.Errorf("error: something isn't right, possible poor good/bad data")
+	if maxbad == 0.0 {
+		return fmt.Errorf("error: something isn't right; maxbad == 0.0")
 	}
 
 	return nil
