@@ -57,8 +57,8 @@ func TestClassifier(t *testing.T) {
 	}
 
 	for _, sentence := range good {
-		if ok, prob := classifier.Gibberish(sentence); ok {
-			t.Fatalf("falsely flagged good sentence as gibberish; %s at %f (%f)", sentence, prob, classifier.threshold)
+		if r := classifier.Analyze(sentence); r.IsGibberish {
+			t.Fatalf("falsely flagged good sentence as gibberish; %s at %f (%f)", sentence, r.Probability, r.Threshold)
 		}
 	}
 
@@ -73,8 +73,8 @@ func TestClassifier(t *testing.T) {
 	}
 
 	for _, sentence := range bad {
-		if ok, prob := classifier.Gibberish(sentence); !ok {
-			t.Fatalf("failed to detect a gibberish sentence; %s at %f (%f)", sentence, prob, classifier.threshold)
+		if r := classifier.Analyze(sentence); !r.IsGibberish {
+			t.Fatalf("failed to detect a gibberish sentence; %s at %f (%f)", sentence, r.Probability, r.Threshold)
 		}
 	}
 }
@@ -105,8 +105,8 @@ func TestClassifierFromFile(t *testing.T) {
 	}
 
 	for _, sentence := range good {
-		if ok, prob := classifier.Gibberish(sentence); ok {
-			t.Fatalf("falsely flagged good sentence as gibberish; %s at %f (%f)", sentence, prob, classifier.threshold)
+		if r := classifier.Analyze(sentence); r.IsGibberish {
+			t.Fatalf("falsely flagged good sentence as gibberish; %s at %f (%f)", sentence, r.Probability, r.Threshold)
 		}
 	}
 
@@ -121,8 +121,8 @@ func TestClassifierFromFile(t *testing.T) {
 	}
 
 	for _, sentence := range bad {
-		if ok, prob := classifier.Gibberish(sentence); !ok {
-			t.Fatalf("failed to detect a gibberish sentence; %s at %f (%f)", sentence, prob, classifier.threshold)
+		if r := classifier.Analyze(sentence); !r.IsGibberish {
+			t.Fatalf("failed to detect a gibberish sentence; %s at %f (%f)", sentence, r.Probability, r.Threshold)
 		}
 	}
 }

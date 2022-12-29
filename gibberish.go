@@ -23,6 +23,14 @@ var (
 	DefaultRuneSet = []rune("abcdefghijklmnopqrstuvwxyz ")
 )
 
+// Analysis is the results of Analyze. Contains information about the text that
+// was checked.
+type Analysis struct {
+	Threshold   float64
+	Probability float64
+	IsGibberish bool
+}
+
 type Classifier struct {
 	threshold float64
 	counts    map[rune]map[rune]float64
@@ -85,10 +93,14 @@ func (c *Classifier) Label(good io.Reader, bad io.Reader) error {
 	return nil
 }
 
-func (c *Classifier) Gibberish(junk string) (bool, float64) {
-	prob := c.avg([]rune(c.normalize(junk)))
+func (c *Classifier) Analyze(junk string) *Analysis {
+	probability := c.avg([]rune(c.normalize(junk)))
 
-	return prob < c.threshold, prob
+	return &Analysis{
+		Probability: probability,
+		Threshold:   c.threshold,
+		IsGibberish: probability < c.threshold,
+	}
 }
 
 // Load takes an io.Reader and decodes it. This can be used to read a

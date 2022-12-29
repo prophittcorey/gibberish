@@ -43,12 +43,12 @@ func main() {
 						break
 					}
 
-					result, prob := classifier.Gibberish(text)
+					result := classifier.Analyze(text)
 
-					if result {
-						fmt.Printf("\n => Gibberish (%.2f%%)\n", prob)
+					if result.IsGibberish {
+						fmt.Printf("\n => Gibberish (%.2f%% / %.2f%%)\n", result.Probability, result.Threshold)
 					} else {
-						fmt.Printf("\n => Good (%.2f%%)\n", prob)
+						fmt.Printf("\n => Good (%.2f%% / %.2f%%)\n", result.Probability, result.Threshold)
 					}
 
 					fmt.Printf("\n> Write some text to check...\n\n")
@@ -72,9 +72,9 @@ func main() {
 			classifier := gibberish.New()
 
 			if err := classifier.LoadFile(classifierfile); err == nil {
-				result, prob := classifier.Gibberish(check)
+				result := classifier.Analyze(check)
 
-				fmt.Printf("Gibberish? %v (%.2f%%)\n", result, prob)
+				fmt.Printf("Gibberish? %v (%.2f%%)\n", result.IsGibberish, result.Probability)
 			}
 
 			return
