@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -18,14 +19,45 @@ func main() {
 	var classifierfile string
 	var trainingfile string
 	var check string
+	var repl bool
 
 	flag.StringVar(&classifierfile, "classifier", "", "a path to a classifier")
 	flag.StringVar(&trainingfile, "train", "", "one or more text files to train a classifier with (plain text)")
 	flag.StringVar(&check, "check", "", "a string to check using the specified classifier")
+	flag.BoolVar(&repl, "repl", false, "if specified, a repl will be started")
 
 	flag.Parse()
 
 	if len(classifierfile) > 0 {
+		if repl {
+			classifier := gibberish.New()
+
+			if err := classifier.LoadFile(classifierfile); err == nil {
+				reader := bufio.NewScanner(os.Stdin)
+				fmt.Printf("> Write some text to check...\n\n")
+
+				for reader.Scan() {
+					text := reader.Text()
+
+					if text == "quit" || text == "exit" {
+						break
+					}
+
+					result, prob := classifier.Gibberish(text)
+
+					if result {
+						fmt.Printf("\n => Gibberish (%.2f%%)\n", prob)
+					} else {
+						fmt.Printf("\n => Good (%.2f%%)\n", prob)
+					}
+
+					fmt.Printf("\n> Write some text to check...\n\n")
+				}
+			}
+
+			return
+		}
+
 		/* training */
 		if len(trainingfile) > 0 {
 			if err := train(classifierfile, trainingfile); err != nil {
