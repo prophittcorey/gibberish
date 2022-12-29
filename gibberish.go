@@ -59,6 +59,8 @@ func (c *Classifier) Train(r io.Reader) error {
 		}
 	}
 
+	c.threshold = 25.0
+
 	return nil
 }
 
