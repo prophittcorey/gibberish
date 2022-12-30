@@ -10,7 +10,11 @@ gibberish text.
 Training and saving a classifier.
 
 ```golang
-import "github.com/prophittcorey/gibberish"
+import (
+    "log"
+
+    "github.com/prophittcorey/gibberish"
+)
 
 classifier := New()
 
@@ -37,21 +41,25 @@ classifier.Label(
 /* save */
 
 if err := classifier.SaveFile(os.TempDir() + "/gibberish.classifier"); err != nil {
-  t.Fatalf("failed to write classifier file; %s", err)
+  log.Fatalf("failed to write classifier file; %s\n", err)
 }
 ```
 
 Loading and using a classifier.
 
 ```bash
-import "github.com/prophittcorey/gibberish"
+import (
+    "log"
+
+    "github.com/prophittcorey/gibberish"
+)
 
 classifier := New()
 
 /* load */
 
 if err := classifier.LoadFile(os.TempDir() + "/gibberish.classifier"); err != nil {
-  t.Fatalf("failed to load classifier file; %s", err)
+  log.Fatalf("failed to load classifier file; %s\n", err)
 }
 
 /* test */
