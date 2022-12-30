@@ -89,7 +89,8 @@ lines are needed).
 
 ```bash
 $ gibberish --train "/tmp/moby-dick.txt" --good "/tmp/good.txt" --bad "/tmp/bad.txt" --classifier /tmp/english.classifier
-$ gibberish --classifier /tmp/english.classifier --check "This looks like a good sentence." # Gibberish? False (99.65%)
+$ gibberish --classifier /tmp/english.classifier --check "This looks like a good sentence."
+$ => Good (205.11% / 68.58%)
 ```
 
 ## License

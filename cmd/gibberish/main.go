@@ -79,9 +79,9 @@ func main() {
 				result := classifier.Analyze(check)
 
 				if result.IsGibberish {
-					fmt.Printf("\n => Gibberish (%.2f%% / %.2f%%)\n", result.Probability, result.Threshold)
+					fmt.Printf("=> Gibberish (%.2f%% / %.2f%%)\n", result.Probability, result.Threshold)
 				} else {
-					fmt.Printf("\n => Good (%.2f%% / %.2f%%)\n", result.Probability, result.Threshold)
+					fmt.Printf("=> Good (%.2f%% / %.2f%%)\n", result.Probability, result.Threshold)
 				}
 			}
 
