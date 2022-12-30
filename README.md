@@ -93,6 +93,12 @@ $ gibberish --classifier /tmp/english.classifier --check "This looks like a good
 $ => Good (205.11% / 68.58%)
 ```
 
+A repl is included with the tool to enable quicker testing of classifiers.
+
+```bash
+$ gibberish --classifier /tmp/english.classifier --repl
+```
+
 ## License
 
 The source code for this repository is licensed under the MIT license, which you can
