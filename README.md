@@ -16,7 +16,7 @@ import (
     "github.com/prophittcorey/gibberish"
 )
 
-classifier := New()
+classifier := gibberish.New()
 
 /* train */
 
@@ -54,7 +54,7 @@ import (
     "github.com/prophittcorey/gibberish"
 )
 
-classifier := New()
+classifier := gibberish.New()
 
 /* load */
 
