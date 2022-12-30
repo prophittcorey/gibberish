@@ -56,9 +56,11 @@ if err := classifier.LoadFile(os.TempDir() + "/gibberish.classifier"); err != ni
 
 /* test */
 
-hasGibberish, probability := classifier.Predict("Joey")
+result := classifier.Analyze("Joey")
 
-fmt.Printf("Has gibberish %v w/%.2f probability", hasGibberish, probability)
+if result.IsGibberish {
+  fmt.Println("Looks like you got some gibberish text.")
+}
 ```
 
 ## Tool Usage
@@ -81,11 +83,13 @@ For our test case, let's use an English novel (Moby Dick).
 $ wget -O /tmp/moby-dick.txt https://www.gutenberg.org/files/15/15-0.txt
 ```
 
-Training a classifier and testing it out is easy.
+Training a classifier and testing it out is easy. You will need some examples
+of good and bad text. You can generate them on your own (only a few example
+lines are needed).
 
 ```bash
-$ gibberish --train "/tmp/moby-dick.txt" --classifier /tmp/text.classifier
-$ gibberish --classifier /tmp/text.classifier --check "This looks like a good sentence." # Gibberish? False (99.65%)
+$ gibberish --train "/tmp/moby-dick.txt" --good "/tmp/good.txt" --bad "/tmp/bad.txt" --classifier /tmp/english.classifier
+$ gibberish --classifier /tmp/english.classifier --check "This looks like a good sentence." # Gibberish? False (99.65%)
 ```
 
 ## License
