@@ -49,7 +49,9 @@ Loading and using a classifier.
 
 ```bash
 import (
+    "fmt"
     "log"
+    "os"
 
     "github.com/prophittcorey/gibberish"
 )
