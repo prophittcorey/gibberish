@@ -91,7 +91,7 @@ The `gibberish` tool can be used to create and test classifiers.
 Installing the tool can be done through `go` tool.
 
 ```bash
-$ go install github.com/prophittcorey/gibberish/cmd/gibberish@latest
+go install github.com/prophittcorey/gibberish/cmd/gibberish@latest
 ```
 
 First, we need some data. The data you will require depends on your intended
@@ -101,7 +101,7 @@ languages will work.
 For our test case, let's use an English novel (Moby Dick).
 
 ```bash
-$ wget -O /tmp/moby-dick.txt https://www.gutenberg.org/files/15/15-0.txt
+wget -O /tmp/moby-dick.txt https://www.gutenberg.org/files/15/15-0.txt
 ```
 
 Training a classifier and testing it out is easy. You will need some examples
@@ -109,15 +109,14 @@ of good and bad text. You can generate them on your own (only a few example
 lines are needed).
 
 ```bash
-$ gibberish --train "/tmp/moby-dick.txt" --good "/tmp/good.txt" --bad "/tmp/bad.txt" --classifier /tmp/english.classifier
-$ gibberish --classifier /tmp/english.classifier --check "This looks like a good sentence."
-$ => Good (205.11% / 68.58%)
+gibberish --train "/tmp/moby-dick.txt" --good "/tmp/good.txt" --bad "/tmp/bad.txt" --classifier /tmp/english.classifier
+gibberish --classifier /tmp/english.classifier --check "This looks like a good sentence." # $ => Good (205.11% / 68.58%)
 ```
 
 A repl is included with the tool to enable quicker testing of classifiers.
 
 ```bash
-$ gibberish --classifier /tmp/english.classifier --repl
+gibberish --classifier /tmp/english.classifier --repl
 ```
 
 ## License
