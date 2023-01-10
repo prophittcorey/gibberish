@@ -52,7 +52,7 @@ func main() {
 
 Loading and using a classifier.
 
-```bash
+```golang
 package main
 
 import (
